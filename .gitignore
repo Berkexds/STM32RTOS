@@ -1,0 +1,12 @@
+Debug/
+build/
+*.launch
+*.log
+*.exe
+*.bin
+*.elf
+*.hex
+.ipch/
+.settings/
+.metadata/
+*.ioc~ 
