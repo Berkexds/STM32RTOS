@@ -10,10 +10,11 @@
 
 #include "ssd1306.h"
 #include "stdlib.h"
+#include "fonts.h" // fonts.h eklenmeli
 #include <string.h>
 
 extern I2C_HandleTypeDef hi2c1;
-
+static uint8_t CurrentX, CurrentY;
 static uint8_t SSD1306_Buffer[SSD1306_WIDTH * SSD1306_HEIGHT / 8];
 
 #define SSD1306_I2C_ADDR 0x78
@@ -85,3 +86,36 @@ void ssd1306_DrawPixel(uint8_t x, uint8_t y, SSD1306_COLOR color) {
     else
         SSD1306_Buffer[x + (y / 8) * SSD1306_WIDTH] &= ~(1 << (y % 8));
 }
+
+
+
+void ssd1306_SetCursor(uint8_t x, uint8_t y) {
+    CurrentX = x;
+    CurrentY = y;
+}
+
+void ssd1306_WriteString(char *str) {
+    while (*str) {
+        ssd1306_WriteChar(*str, Font_7x10, White); // Font fonksiyonunu fonts.c'den çağır
+        str++;
+    }
+}
+
+
+void ssd1306_WriteChar(char ch, FontDef Font, SSD1306_COLOR color) {
+    uint32_t i, b, j;
+    for (i = 0; i < Font.height; i++) {
+        b = Font.data[(ch - 32) * Font.height + i];
+        for (j = 0; j < Font.width; j++) {
+            if ((b << j) & 0x8000) {
+                ssd1306_DrawPixel(CurrentX + j, (CurrentY + i), color);
+            } else {
+                ssd1306_DrawPixel(CurrentX + j, (CurrentY + i), Black);
+            }
+        }
+    }
+    CurrentX += Font.width;
+}
+
+
+
